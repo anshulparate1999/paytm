@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card Goals Prototype</title>
+<style>
+:root{--blue:#00BAF2;--navy:#002E6E;--ink:#15181D;--text:#2B3038;--grey:#5B6470;--line:#E3E8EF;--bg:#F5F7FA;--soft:#EAF6FD;--green:#1F8A4C;--greenbg:#E3F3EA;--amber:#C2410C;--amberbg:#FDEDE4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#E9EEF4;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+.note{font-size:13px;color:var(--grey);margin-bottom:10px;text-align:center;max-width:420px}
+.wrap{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.phone{width:375px;max-width:100%;height:760px;background:#fff;border:10px solid #15181D;border-radius:44px;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.status{height:30px;display:flex;justify-content:space-between;align-items:center;padding:0 22px;font-size:12px;font-weight:700;color:var(--ink);flex:none}
+.screen{flex:1;overflow-y:auto;background:var(--bg);display:none;flex-direction:column}
+.screen.on{display:flex}
+.bar{background:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);flex:none;position:sticky;top:0;z-index:2}
+.bar h2{font-size:16px;color:var(--ink)}
+.back{border:none;background:none;font-size:20px;cursor:pointer;color:var(--ink);width:24px}
+.wm{font-weight:800;font-size:22px;letter-spacing:-.5px;color:var(--navy)}.wm b{color:var(--blue)}
+.pad{padding:12px}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--line)}
+.title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 6px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;text-align:center;cursor:pointer;border:none;background:none;color:var(--text)}
+.ic{width:42px;height:42px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:20px}
+.banner{background:linear-gradient(120deg,#E6F6FE,#F3FAFF);border:1px solid #CDEBFA;border-radius:14px;padding:14px;cursor:pointer;margin-bottom:12px}
+.banner .k{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1px}
+.banner .h{font-size:15px;font-weight:700;color:var(--navy);margin:4px 0}
+.banner .s{font-size:12px;color:var(--grey)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cc{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:#fff;cursor:pointer;width:100%;text-align:left}
+.logo{width:40px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex:none}
+.hdfc{background:#004C8F}.sbi{background:#1B6FB5}.axis{background:#97144D}
+.nm{font-size:13px;font-weight:700;color:var(--ink)}
+.sm{font-size:11.5px;color:var(--grey)}
+.amt{font-size:14px;font-weight:700;color:var(--ink);text-align:right}
+.btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;background:var(--navy);color:#fff;cursor:pointer}
+.btn.lt{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+.btn+.btn{margin-top:8px}
+.chip{font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 8px;white-space:nowrap}
+.ok{background:var(--soft);color:#0874D1}.risk{background:var(--amberbg);color:var(--amber)}.done{background:var(--greenbg);color:var(--green)}.est{background:#EEF1F5;color:var(--grey)}
+.prog{height:8px;background:#E1E8F0;border-radius:6px;margin:7px 0 6px}
+.prog i{display:block;height:100%;border-radius:6px;background:#0874D1;transition:width .6s}
+.prog.r i{background:var(--amber)}.prog.g i{background:var(--green)}
+.goal{padding:10px 0;border-top:1px dashed var(--line)}
+.goal:first-of-type{border-top:none}
+.tip{background:#FFF8E6;border:1px solid #F5E0A8;border-radius:10px;padding:9px 10px;font-size:12px;margin-top:8px;line-height:1.4}
+.big{font-size:26px;font-weight:800;color:var(--ink)}
+.succ{text-align:center;padding:22px 12px 8px}
+.tick{width:58px;height:58px;border-radius:50%;background:var(--green);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.opt{display:flex;align-items:center;gap:10px;padding:11px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:#fff;font-size:13px}
+.opt.sel{border-color:#0874D1;background:#F2F9FF}
+.dot{width:16px;height:16px;border-radius:50%;border:2px solid #9AA5B4;flex:none}
+.opt.sel .dot{border:5px solid #0874D1}
+select{width:100%;padding:11px;border-radius:10px;border:1.5px solid var(--line);font-size:13px;background:#fff;margin-bottom:10px}
+label.l{font-size:12px;font-weight:700;color:var(--grey);display:block;margin:6px 0}
+.consent{font-size:11.5px;color:var(--grey);background:#F4F8FC;border-radius:10px;padding:10px;line-height:1.45;margin:6px 0 12px}
+.toast{position:absolute;left:12px;right:12px;top:40px;background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:12px;display:none;z-index:9;cursor:pointer;border-left:4px solid var(--amber)}
+.toast.on{display:block;animation:dn .35s}
+@keyframes dn{from{transform:translateY(-20px);opacity:0}}
+.tag{font-size:10.5px;font-weight:700;color:var(--amber);background:var(--amberbg);border-radius:6px;padding:2px 6px;display:inline-block;margin-top:4px}
+.pin{display:flex;gap:10px;justify-content:center;margin:18px 0}
+.pin span{width:14px;height:14px;border-radius:50%;background:#C9D2DD}
+.pin span.f{background:var(--navy)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 20px}
+.keys button{padding:14px;border:none;background:#fff;border-radius:10px;font-size:18px;cursor:pointer}
+.legend{font-size:11px;color:var(--grey);line-height:1.5}
+.side{width:300px;max-width:100%;font-size:13px;line-height:1.5}
+.side h3{font-size:15px;color:var(--ink);margin-bottom:6px}
+.side ol{padding-left:18px}.side li{margin-bottom:6px}
+.side button{margin-top:10px;padding:8px 12px;border-radius:8px;border:1px solid #9AA5B4;background:#fff;cursor:pointer;font-size:12px}
+.nav{display:flex;border-top:1px solid var(--line);background:#fff;flex:none}
+.nav div{flex:1;text-align:center;font-size:10px;padding:8px 0;color:var(--grey)}
+.small{font-size:11px;color:var(--grey);margin-top:6px;line-height:1.4}
+
+.hint{position:relative;animation:pulse 1.4s infinite;outline:3px solid #FF8A00;outline-offset:3px;border-radius:12px;z-index:3}
+.hint::after{content:"👆 Tap here";position:absolute;right:-4px;top:-14px;background:#FF8A00;color:#fff;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;z-index:5;pointer-events:none}
+#keys.hint::after{content:"👆 Tap any 4 numbers"}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,138,0,.55)}50%{box-shadow:0 0 0 8px rgba(255,138,0,0)}}
+.guide{width:375px;max-width:100%;background:#fff;border-radius:14px;padding:10px 14px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,.08);border-left:5px solid #FF8A00}
+.guide .gs{font-size:11px;font-weight:700;color:#FF8A00;letter-spacing:1px}
+.guide .gt{font-size:14px;font-weight:700;color:var(--ink);margin:3px 0}
+.guide .gd{font-size:12px;color:var(--grey);line-height:1.4}
+.gbar{display:flex;gap:4px;margin-top:8px}.gbar i{flex:1;height:4px;border-radius:3px;background:#E3E8EF}.gbar i.on{background:#FF8A00}
+.gtog{font-size:11px;color:var(--grey);background:none;border:none;text-decoration:underline;cursor:pointer;margin-top:6px}
+.side li.cur{font-weight:700;color:#FF8A00}
+.demolink{display:block;margin:14px auto 4px;border:none;background:none;color:#0874D1;font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 8px}
+.demolink.hint::after{right:-10px;top:-18px}
+.demo{background:#FFF7EC;border:1px dashed #FF8A00;border-radius:12px;padding:10px;margin-bottom:12px}
+.dk{font-size:10px;font-weight:700;color:#C26200;letter-spacing:1px;margin-bottom:8px}
+.pick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pick button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 2px;font-size:11.5px;cursor:pointer}
+.pick button.on{border-color:#0874D1;background:#F2F9FF;font-weight:700;color:#0874D1}
+</style>
+</head>
+<body>
+<p class="note">Concept prototype. Not a real Paytm screen; all numbers are illustrative and no real payment happens.</p>
+<div class="guide" id="guide"><div class="gs" id="gs">STEP 1 OF 8</div><div class="gt" id="gt"></div><div class="gd" id="gd"></div><div class="gbar" id="gbar"></div><button class="gtog" id="gtog" onclick="toggleHints()">Hide hints</button></div>
+<div class="wrap">
+<div class="phone">
+  <div class="status"><span>9:41</span><span>5G ▮▮</span></div>
+  <div class="toast" id="toast" onclick="go('goals');hideToast()">
+    <div class="row"><b style="font-size:13px">Lounge access at risk</b><span class="sm">now</span></div>
+    <div class="sm" style="margin-top:3px">HDFC Regalia Gold: ₹12k to go, 19 days left. Move usual spend, don’t spend extra.</div>
+  </div>
+
+  <!-- HOME -->
+  <section class="screen on" id="home">
+    <div class="bar"><span class="wm">pay<b>tm</b></span></div>
+    <div class="pad">
+      <div class="card">
+        <div class="title">Recharges &amp; Bill Payments</div>
+        <div class="grid">
+          <button class="tile"><span class="ic">📱</span>Mobile Recharge</button>
+          <button class="tile"><span class="ic">💡</span>Electricity Bill</button>
+          <button class="tile"><span class="ic">🚗</span>FASTag Recharge</button>
+          <button class="tile hl" onclick="go('ccbill')"><span class="ic">💳</span>Credit Card Bill</button>
+          <button class="tile"><span class="ic">📡</span>DTH Recharge</button>
+          <button class="tile"><span class="ic">🛡️</span>Insurance Premium</button>
+          <button class="tile"><span class="ic">🏦</span>Loan EMI</button>
+          <button class="tile"><span class="ic">▦</span>View All</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="title">Travel</div>
+        <div class="row sm"><span>✈️ Flights</span><span>🚌 Bus</span><span>🚆 Trains</span><span>🌍 Intl.</span></div>
+      </div>
+      <div class="card"><div class="title">Credit Cards</div><div class="sm">One destination for credit cards: apply, pay bills and track offers.</div></div>
+    </div>
+    <div class="nav"><div>🏠<br>Home</div><div>📷<br>Scan</div><div>💸<br>Pay</div><div>📜<br>History</div></div>
+  </section>
+
+  <!-- CREDIT CARD BILL -->
+  <section class="screen" id="ccbill">
+    <div class="bar"><button class="back" onclick="go('home')">←</button><h2>Credit Card Bill Payment</h2></div>
+    <div class="pad">
+      <div class="title">Your saved cards</div>
+      <button class="cc" id="hdfcCard" onclick="pickBill('hdfc')">
+        <span class="logo hdfc">HDFC</span>
+        <span style="flex:1"><span class="nm">HDFC Regalia Gold ••1234</span><br><span class="sm">Due 15 Jan · safe to pay by 12 Jan</span><br><span class="tag" id="hdfcTag" style="display:none">Lounge access at risk</span></span>
+        <span class="amt">₹24,500<br><span class="sm">Total due</span></span>
+      </button>
+      <button class="cc" onclick="pickBill('sbi')">
+        <span class="logo sbi">SBI</span>
+        <span style="flex:1"><span class="nm">SBI Cashback ••0921</span><br><span class="sm">Due 20 Jan</span></span>
+        <span class="amt">₹6,200<br><span class="sm">Total due</span></span>
+      </button>
+      <div class="cc" style="border-style:dashed;cursor:default">
+        <span class="logo axis">AXIS</span>
+        <span style="flex:1"><span class="nm">Axis card ••5521</span><br><span class="sm">Paid by bank autopay. Add it here to track its goals.</span></span>
+      </div>
+      <p class="small">Supports 35+ banks via BBPS. Paying in full and on time protects your credit score.</p>
+    </div>
+  </section>
+
+  <!-- PAY -->
+  <section class="screen" id="pay">
+    <div class="bar"><button class="back" onclick="go('ccbill')">←</button><h2>Pay Credit Card Bill</h2></div>
+    <div class="pad">
+      <div class="card">
+        <div class="sm" id="payCard">HDFC Regalia Gold ••1234</div>
+        <div class="big" id="payAmt" style="margin:6px 0">₹24,500</div>
+        <div class="sm">Total due · Minimum due ₹1,225 · Due 15 Jan</div>
+      </div>
+      <div class="title">Pay using</div>
+      <div class="opt sel"><span class="dot"></span>UPI · Bank account ••4410</div>
+      <div class="opt"><span class="dot"></span>Debit card ••7781</div>
+      <div class="opt"><span class="dot"></span>Net banking</div>
+      <button class="btn" style="margin-top:8px" onclick="go('pin')" id="payBtn">Pay ₹24,500</button>
+    </div>
+  </section>
+
+  <!-- PIN -->
+  <section class="screen" id="pin">
+    <div class="bar"><button class="back" onclick="go('pay')">←</button><h2>Enter UPI PIN</h2></div>
+    <div class="pad" style="text-align:center">
+      <div class="sm" style="margin-top:10px">Prototype: tap any 4 keys</div>
+      <div class="pin" id="dots"><span></span><span></span><span></span><span></span></div>
+      <div class="keys" id="keys"></div>
+    </div>
+  </section>
+
+  <!-- SUCCESS -->
+  <section class="screen" id="success">
+    <div class="pad">
+      <div class="succ"><div class="tick">✓</div><div class="big" id="sAmt">₹24,500</div><div class="sm" id="sTo">paid to HDFC Regalia Gold ••1234</div></div>
+      <div class="card" id="sGoals">
+        <div class="row"><div class="title" style="margin:0">Card Goals · Regalia Gold</div><span class="chip est">Estimated</span></div>
+        <div class="goal">
+          <div class="row"><b style="font-size:13px">Annual fee waiver</b><span class="chip ok">On track</span></div>
+          <div class="prog"><i style="width:85%"></i></div>
+          <div class="sm">₹58k to go · 41 days left · about ₹10k a week</div>
+        </div>
+        <div class="goal">
+          <div class="row"><b style="font-size:13px">Lounge access, Jan–Mar</b><span class="chip risk">At risk</span></div>
+          <div class="prog r"><i style="width:80%"></i></div>
+          <div class="sm">₹12k to go · 19 days left · about ₹4.4k a week</div>
+          <div class="tip"><b>Tip:</b> move ₹12k of your usual spend to this card by 31 Dec to unlock 3 lounge visits. Don’t spend extra just for this.</div>
+        </div>
+        <button class="btn" style="margin-top:12px" id="sCta" onclick="startSetup()">Track all my cards</button>
+      </div>
+      <div class="card" id="sSbi" style="display:none">
+        <div class="row"><div class="title" style="margin:0">Card Goals · SBI Cashback</div><span class="chip done">Done</span></div>
+        <div class="prog g"><i style="width:100%"></i></div>
+        <div class="sm">₹2L reached · ₹999 fee waived this year</div>
+        <button class="btn lt" style="margin-top:12px" onclick="go('goals')">See all card goals</button>
+      </div>
+      <button class="btn lt" onclick="go('home')">Back to home</button>
+    </div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="screen" id="setup">
+    <div class="bar"><button class="back" onclick="go('ccbill')">←</button><h2>Track this card’s goals</h2></div>
+    <div class="pad">
+      <div class="card">
+        <div class="nm">HDFC Bank card ••1234</div>
+        <label class="l">Which card is it?</label>
+        <div class="opt sel" onclick="sel(this)"><span class="dot"></span>Regalia Gold</div>
+        <div class="opt" onclick="sel(this)"><span class="dot"></span>Millennia</div>
+        <div class="opt" onclick="sel(this)"><span class="dot"></span>Diners Club Privilege</div>
+        <label class="l">When did you get it?</label>
+        <select><option>January 2024</option><option>February 2024</option><option>March 2024</option></select>
+        <div class="consent">🔒 We use your Paytm bills and card payments only. We never read SMS or email. Progress is an <b>estimate</b> until you add a statement. Turn off anytime in 2 taps.</div>
+        <button class="btn" id="setupBtn" onclick="finishSetup()">Agree and start tracking</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GOALS -->
+  <section class="screen" id="goals">
+    <div class="bar"><button class="back" onclick="go('home')">←</button><h2>Card Goals</h2></div>
+    <div class="pad">
+      <div class="card" style="background:var(--navy);color:#fff;border:none">
+        <div style="font-size:12px;opacity:.8">Spent this month on 3 cards (estimated)</div>
+        <div style="font-size:24px;font-weight:800;margin:4px 0">₹45k</div>
+        <div style="font-size:12px;opacity:.85">2 goals on track · <span id="riskCount">1 at risk</span> · 1 done</div>
+      </div>
+      <div class="card">
+        <div class="row"><div class="title" style="margin:0">HDFC Regalia Gold ••1234</div><span class="chip est">Estimated</span></div>
+        <div class="goal">
+          <div class="row"><b style="font-size:13px">Annual fee waiver</b><span class="chip ok">On track</span></div>
+          <div class="prog"><i id="feeBar" style="width:85%"></i></div>
+          <div class="sm" id="feeTxt">₹3.42L of ₹4L · ₹58k to go · 41 days left</div>
+        </div>
+        <div class="goal">
+          <div class="row"><b style="font-size:13px">Lounge access, Jan–Mar</b><span class="chip risk" id="lgChip">At risk</span></div>
+          <div class="prog r" id="lgProg"><i id="lgBar" style="width:80%"></i></div>
+          <div class="sm" id="lgTxt">₹48k of ₹60k · ₹12k to go · 19 days left</div>
+        </div>
+        <div class="goal">
+          <div class="row"><b style="font-size:13px">₹5L flight voucher</b><span class="chip est">Far off</span></div>
+          <div class="prog"><i style="width:68%;background:#9AA5B4"></i></div>
+          <div class="sm">₹3.42L of ₹5L this card year</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row"><div class="title" style="margin:0">SBI Cashback ••0921</div><span class="chip done">Done</span></div>
+        <div class="prog g"><i style="width:100%"></i></div>
+        <div class="sm">Fee waiver reached · ₹999 saved</div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <div class="row"><div class="title" style="margin:0">Axis card ••5521</div><span class="chip est">Not enough data</span></div>
+        <div class="sm">Paid by bank autopay, so we can’t see its bills yet. Add it here or upload a statement to track its goals.</div>
+      </div>
+      <div class="legend"><b>Estimated</b>: from bill totals, less a safety margin. <b>Verified</b>: from a statement you add (coming soon). <b>Not enough data</b>: no estimate and no tips.</div>
+      <button id="goalsCo" class="demolink" onclick="go('checkout')">Next in demo: how the checkout tag works →</button>
+    </div>
+  </section>
+
+  <!-- CHECKOUT -->
+  <section class="screen" id="checkout">
+    <div class="bar"><button class="back" onclick="go('home')">←</button><h2 id="coHead">Pay ₹4,800</h2></div>
+    <div class="pad">
+      <div class="demo"><div class="dk">DEMO · PICK WHAT THE USER IS BUYING</div><div class="pick" id="pick">
+        <button class="on" onclick="pickBuy(0,this)">✈️ Flight</button><button onclick="pickBuy(1,this)">🚆 Train</button><button onclick="pickBuy(2,this)">🚌 Bus</button><button onclick="pickBuy(3,this)">🎬 Movie</button></div></div>
+      <div class="card"><div class="nm" id="coItem">Flight booking · Delhi → Mumbai</div><div class="sm" id="coSub">18 Dec · 1 traveller</div><div class="big" id="coAmt" style="margin-top:6px">₹4,800</div></div>
+      <div class="title">Choose how to pay</div>
+      <div class="opt sel" onclick="sel(this);payWith='hdfc'"><span class="dot"></span><span style="flex:1">HDFC Regalia Gold ••1234<br><span class="tag">₹12k to lounge access</span><br><span class="sm" id="coAfter">After this payment: ₹7.2k to go</span></span></div>
+      <div class="opt" onclick="sel(this);payWith='sbi'"><span class="dot"></span><span style="flex:1">SBI Cashback ••0921 <span class="chip done">Fee waived</span></span></div>
+      <div class="opt" onclick="sel(this);payWith='upi'"><span class="dot"></span>UPI · bank account</div>
+      <p class="small">Tags compare only your own cards. Use them for spends you already planned.</p>
+      <button class="btn" id="coPay" style="margin-top:10px" onclick="checkoutPay()"><span id="coBtn">Pay ₹4,800</span></button>
+    </div>
+  </section>
+
+  <!-- CHECKOUT DONE -->
+  <section class="screen" id="cdone">
+    <div class="pad">
+      <div class="succ"><div class="tick">✓</div><div class="big" id="cdAmt">₹4,800</div><div class="sm" id="cdTo">paid with HDFC Regalia Gold ••1234</div></div>
+      <div class="card" id="cdGoal">
+        <div class="row"><b style="font-size:13px">Lounge access, Jan–Mar</b><span class="chip risk">At risk</span></div>
+        <div class="prog r"><i id="cdBar" style="width:80%"></i></div>
+        <div class="sm" id="cdTxt">Now <b>₹7.2k to go</b> · 19 days left · about ₹2.7k a week</div>
+      </div>
+      <button class="btn" id="cdGoals" onclick="go('goals')">See all card goals</button>
+      <button class="btn lt" onclick="go('home')">Back to home</button>
+    </div>
+  </section>
+</div>
+
+<div class="side">
+  <h3>How to click through</h3>
+  <ol id="steps">
+    <li>Home → <b>Credit Card Bill</b>.</li>
+    <li>Pay the HDFC bill, enter any 4-digit PIN.</li>
+    <li>Success screen shows the card’s goals and a tip.</li>
+    <li><b>Track all my cards</b> → pick the variant → <b>Agree</b>.</li>
+    <li>Card Goals dashboard, with Estimated / Not enough data labels.</li>
+    <li>A lounge alert pops up; tap it, or try the checkout: pick a flight, train, bus or movie and see the tagged card’s progress move.</li>
+  </ol>
+  <button onclick="reset()">Restart prototype</button>
+</div>
+</div>
+
+<script>
+var tracked=false, bill='hdfc', payWith='hdfc', pinN=0, lounge=48000;
+function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('on',s.id===id)});var s=document.getElementById(id);if(s)s.scrollTop=0;if(id==='pin'){pinN=0;drawPin()}}
+function sel(el){el.parentNode.querySelectorAll('.opt').forEach(function(o){o.classList.remove('sel')});el.classList.add('sel')}
+function fmt(n){return '₹'+n.toLocaleString('en-IN')}
+function pickBill(b){bill=b;var amt=b==='hdfc'?24500:6200;document.getElementById('payCard').textContent=b==='hdfc'?'HDFC Regalia Gold ••1234':'SBI Cashback ••0921';document.getElementById('payAmt').textContent=fmt(amt);document.getElementById('payBtn').textContent='Pay '+fmt(amt);go('pay')}
+var keys=document.getElementById('keys');['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(function(k){var b=document.createElement('button');b.textContent=k;b.onclick=function(){if(k==='⌫'){pinN=Math.max(0,pinN-1)}else if(k){pinN++}drawPin();if(pinN>=4)setTimeout(paid,250)};keys.appendChild(b)});
+function drawPin(){document.querySelectorAll('#dots span').forEach(function(d,i){d.classList.toggle('f',i<pinN)})}
+function paid(){var h=bill==='hdfc';document.getElementById('sAmt').textContent=fmt(h?24500:6200);document.getElementById('sTo').textContent='paid to '+(h?'HDFC Regalia Gold ••1234':'SBI Cashback ••0921');document.getElementById('sGoals').style.display=h?'block':'none';document.getElementById('sSbi').style.display=h?'none':'block';document.getElementById('sCta').textContent=tracked?'See all card goals':'Track all my cards';go('success')}
+function startSetup(){if(tracked){go('goals')}else{go('setup')}}
+function finishSetup(){tracked=true;document.getElementById('hdfcTag').style.display='inline-block';go('goals');setTimeout(showToast,2500)}
+function showToast(){if(document.getElementById('goals').classList.contains('on')||document.getElementById('home').classList.contains('on'))document.getElementById('toast').classList.add('on')}
+function hideToast(){document.getElementById('toast').classList.remove('on')}
+function checkoutPay(){hideToast();var t=document.getElementById('cdTo'),g=document.getElementById('cdGoal');if(payWith==='hdfc'){lounge=Math.min(60000,48000+buy.amt);t.textContent='paid with HDFC Regalia Gold ••1234';g.style.display='block';setTimeout(function(){document.getElementById('cdBar').style.width=(lounge/600)+'%'},150);document.getElementById('lgBar').style.width=(lounge/600)+'%';var left=60000-lounge;document.getElementById('lgTxt').textContent=k(lounge)+' of ₹60k · '+k(left)+' to go · 19 days left';document.getElementById('hdfcTag').textContent=k(left)+' to lounge access';document.getElementById('cdTxt').innerHTML='Now <b>'+k(left)+' to go</b> · 19 days left · about '+k(left/19*7)+' a week'}else{t.textContent=payWith==='sbi'?'paid with SBI Cashback ••0921':'paid by UPI';g.style.display='none'}document.getElementById('cdBar').style.width='80%';document.getElementById('cdAmt').textContent=fmt(buy.amt);go('cdone')}
+function reset(){location.reload()}
+
+var BUY=[{amt:4800,item:'Flight booking · Delhi → Mumbai',sub:'18 Dec · 1 traveller'},{amt:1850,item:'Train ticket · Mumbai → Pune, 2A',sub:'20 Dec · 1 traveller'},{amt:1400,item:'Bus ticket · Bengaluru → Chennai, sleeper',sub:'21 Dec · 1 seat'},{amt:900,item:'Movie tickets · 2 seats',sub:'Tonight · 9:30 PM'}],buy=BUY[0];
+function k(n){var v=n/1000;return '₹'+(Math.round(v*10)/10).toString().replace(/\.0$/,'')+'k'}
+function pickBuy(i,el){buy=BUY[i];el.parentNode.querySelectorAll('button').forEach(function(b){b.classList.remove('on')});el.classList.add('on');
+document.getElementById('coItem').textContent=buy.item;document.getElementById('coSub').textContent=buy.sub;document.getElementById('coAmt').textContent=fmt(buy.amt);
+document.getElementById('coHead').textContent='Pay '+fmt(buy.amt);document.getElementById('coBtn').textContent='Pay '+fmt(buy.amt);
+document.getElementById('coAfter').textContent='After this payment: '+k(12000-buy.amt)+' to go'}
+var hints=true, coDone=false, cur='home';
+var G={home:[1,'Tap “Credit Card Bill”','Start where users pay card bills today.','.tile.hl'],
+ccbill:[2,'Tap the HDFC card','Pay the HDFC Regalia Gold bill of ₹24,500.','#hdfcCard'],
+pay:[3,'Tap “Pay ₹24,500”','UPI is already selected.','#payBtn'],
+pin:[4,'Enter any 4-digit PIN','This is a mock PIN pad; nothing is charged.','#keys'],
+success:[5,'Tap “Track all my cards”','After paying, the user sees this card’s goals and a tip.','#sCta'],
+setup:[6,'Tap “Agree and start tracking”','Variant is pre-selected. No SMS or email access.','#setupBtn'],
+goals:[7,'Tap “Next in demo” at the bottom','Every goal carries a label: Estimated, At risk, Done or Not enough data.','#goalsCo'],
+checkout:[8,'Pick a purchase, then tap “Pay”','The HDFC card is tagged because it is closest to lounge access.','#coPay'],
+cdone:[8,'Done: lounge progress moved','The tagged card’s lounge progress updated. Tap “Restart prototype” to demo again.','#cdGoals']};
+function guide(){document.querySelectorAll('.hint').forEach(function(e){e.classList.remove('hint')});var g=G[cur];if(!g)return;
+var step=g[0],t=g[1],d=g[2],sel=g[3];
+if(cur==='goals'&&coDone){t='You’re done';d='Lounge now shows ₹7.2k to go. Tap “Restart prototype” to demo again.';sel=null;step=8}
+if(cur==='success'&&tracked){t='Tap “See all card goals”';sel='#sCta'}
+
+document.getElementById('gs').textContent='STEP '+step+' OF 8';document.getElementById('gt').textContent=t;document.getElementById('gd').textContent=d;
+document.getElementById('gbar').innerHTML=Array.from({length:8},function(_,i){return '<i class="'+(i<step?'on':'')+'"></i>'}).join('');
+document.querySelectorAll('#steps li').forEach(function(li,i){var m={1:0,2:1,3:1,4:1,5:2,6:3,7:4,8:5}[step];li.classList.toggle('cur',i===m)});
+if(hints&&sel){var el=document.querySelector('#'+cur+' '+sel)||document.querySelector(sel);if(el){el.classList.add('hint');el.scrollIntoView({block:'nearest',behavior:'smooth'})}}}
+function toggleHints(){hints=!hints;document.getElementById('gtog').textContent=hints?'Hide hints':'Show hints';guide()}
+var _go=go;go=function(id){cur=id;_go(id);guide()};
+var _co=checkoutPay;checkoutPay=function(){_co();if(payWith==='hdfc')coDone=true;guide()};
+var _st=showToast;showToast=function(){_st();if(hints&&document.getElementById('toast').classList.contains('on')&&cur==='goals'){document.getElementById('gt').textContent='Tap the alert at the top';document.getElementById('gd').textContent='Alerts arrive before a deadline. Or scroll down and tap “Next in demo”.'}};
+guide();
+</script>
+</body>
+</html>
